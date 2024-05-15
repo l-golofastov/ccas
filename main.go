@@ -14,7 +14,7 @@ func main() {
 }
 
 func Run(path string) string {
-	data, err := parseFile(path)
+	data, err := ParseFile(path)
 
 	if err != "" {
 		fmt.Println(err)
@@ -30,10 +30,10 @@ func makeReport(data []string) string {
 	tablesNum, _ := strconv.Atoi(data[0])
 
 	workTimes := strings.Split(data[1], " ")
-	opened, _ := parseTime(workTimes[0])
-	closed, _ := parseTime(workTimes[1])
+	opened, _ := ParseTime(workTimes[0])
+	closed, _ := ParseTime(workTimes[1])
 
-	price, _ := parsePositiveInt(data[2])
+	price, _ := ParsePositiveInt(data[2])
 
 	clientsIn := make(map[string]bool)
 
@@ -60,35 +60,35 @@ func makeReport(data []string) string {
 		fmt.Println(eventStr)
 		res += eventStr + "\n"
 
-		event, _ := parseEvent(eventStr, tablesNum)
+		event, _ := ParseEvent(eventStr, tablesNum)
 		timeStr := event[0]
-		eventId, _ := parsePositiveInt(event[1])
+		eventId, _ := ParsePositiveInt(event[1])
 		name := event[2]
 
 		if eventId == 1 {
-			eventTime, _ := parseTime(timeStr)
+			eventTime, _ := ParseTime(timeStr)
 			if visited := clientsIn[name]; visited {
-				msg := generateError(timeStr, "YouShallNotPass")
+				msg := GenerateError(timeStr, "YouShallNotPass")
 				res += msg + "\n"
 			} else if eventTime.Sub(opened).Minutes() < 0 || closed.Sub(eventTime).Minutes() < 0 {
-				msg := generateError(timeStr, "NotOpenYet")
+				msg := GenerateError(timeStr, "NotOpenYet")
 				res += msg + "\n"
 			} else {
 				clientsIn[name] = true
 			}
 		} else if eventId == 2 {
-			tableId, _ := parsePositiveInt(event[3])
+			tableId, _ := ParsePositiveInt(event[3])
 
 			if _, ok := tables[tableId]; ok {
-				msg := generateError(timeStr, "PlaceIsBusy")
+				msg := GenerateError(timeStr, "PlaceIsBusy")
 				res += msg + "\n"
 			} else if visited := clientsIn[name]; !visited {
-				msg := generateError(timeStr, "ClientUnknown")
+				msg := GenerateError(timeStr, "ClientUnknown")
 				res += msg + "\n"
 			} else {
 				if id, ok := clientsSit[name]; ok {
 					tablesIncome[id] += countIncome(tables[id], timeStr, price)
-					tablesBusiness[id] += countBusiness(tables[id], timeStr)
+					tablesBusiness[id] += countBusyness(tables[id], timeStr)
 					delete(tables, id)
 				}
 
@@ -97,10 +97,10 @@ func makeReport(data []string) string {
 			}
 		} else if eventId == 3 {
 			if len(tables) < tablesNum {
-				msg := generateError(timeStr, "ICanWaitNoLonger!")
+				msg := GenerateError(timeStr, "ICanWaitNoLonger!")
 				res += msg + "\n"
 			} else if len(queue) > tablesNum {
-				msg := generateLeave(timeStr, name)
+				msg := GenerateLeave(timeStr, name)
 				res += msg + "\n"
 				delete(clientsIn, name)
 			} else {
@@ -116,19 +116,19 @@ func makeReport(data []string) string {
 			}
 		} else if eventId == 4 {
 			if visited := clientsIn[name]; !visited {
-				msg := generateError(timeStr, "ClientUnknown")
+				msg := GenerateError(timeStr, "ClientUnknown")
 				res += msg + "\n"
 			} else {
 				if table, ok := clientsSit[name]; ok {
 					tablesIncome[table] += countIncome(tables[table], timeStr, price)
-					tablesBusiness[table] += countBusiness(tables[table], timeStr)
+					tablesBusiness[table] += countBusyness(tables[table], timeStr)
 					delete(clientsSit, name)
 					if len(queue) > 0 {
 						newClient := queue[0]
 						clientsSit[newClient] = table
 						tables[table] = timeStr
 						queue = queue[1:]
-						msg := generateSit(timeStr, newClient, table)
+						msg := GenerateSit(timeStr, newClient, table)
 						res += msg + "\n"
 					} else {
 						delete(tables, table)
@@ -147,11 +147,11 @@ func makeReport(data []string) string {
 	sort.Strings(keys)
 
 	for _, client := range keys {
-		msg := generateLeave(workTimes[1], client)
+		msg := GenerateLeave(workTimes[1], client)
 		res += msg + "\n"
 		if table, ok := clientsSit[client]; ok {
 			tablesIncome[table] += countIncome(tables[table], workTimes[1], price)
-			tablesBusiness[table] += countBusiness(tables[table], workTimes[1])
+			tablesBusiness[table] += countBusyness(tables[table], workTimes[1])
 			delete(tables, table)
 		}
 		delete(clientsIn, client)
@@ -161,7 +161,7 @@ func makeReport(data []string) string {
 	res += workTimes[1] + "\n"
 
 	for i := 1; i < tablesNum+1; i++ {
-		msg := generateTableInfo(tablesIncome[i], tablesBusiness[i], i)
+		msg := GenerateTableInfo(tablesIncome[i], tablesBusiness[i], i)
 		res += msg + "\n"
 	}
 
@@ -169,8 +169,8 @@ func makeReport(data []string) string {
 }
 
 func countIncome(prev string, curr string, price int) int {
-	start, _ := parseTime(prev)
-	stop, _ := parseTime(curr)
+	start, _ := ParseTime(prev)
+	stop, _ := ParseTime(curr)
 	minutes := int(stop.Sub(start).Minutes())
 	hours := 0
 
@@ -183,9 +183,9 @@ func countIncome(prev string, curr string, price int) int {
 	return hours * price
 }
 
-func countBusiness(start string, stop string) int {
-	startTime, _ := parseTime(start)
-	stopTime, _ := parseTime(stop)
+func countBusyness(start string, stop string) int {
+	startTime, _ := ParseTime(start)
+	stopTime, _ := ParseTime(stop)
 
 	return int(stopTime.Sub(startTime).Minutes())
 }
