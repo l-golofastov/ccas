@@ -5,21 +5,21 @@ import (
 	"strconv"
 )
 
-func generateError(errorTime string, msg string) string {
+func GenerateError(errorTime string, msg string) string {
 	eventError := errorTime + " 13 " + msg
 	fmt.Println(eventError)
 
 	return eventError
 }
 
-func generateLeave(leavingTime string, client string) string {
+func GenerateLeave(leavingTime string, client string) string {
 	leave := leavingTime + " 11 " + client
 	fmt.Println(leave)
 
 	return leave
 }
 
-func generateSit(sitTime string, name string, table int) string {
+func GenerateSit(sitTime string, name string, table int) string {
 	tableStr := strconv.Itoa(table)
 	sit := sitTime + " 12 " + name + " " + tableStr
 	fmt.Println(sit)
@@ -27,7 +27,7 @@ func generateSit(sitTime string, name string, table int) string {
 	return sit
 }
 
-func generateTableInfo(income int, business int, id int) string {
+func GenerateTableInfo(income int, business int, id int) string {
 	idStr := strconv.Itoa(id)
 	incomeStr := strconv.Itoa(income)
 
