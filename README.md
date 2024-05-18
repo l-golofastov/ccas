@@ -32,7 +32,7 @@ sudo docker run ccas data.txt
 ```
 sudo docker run -v /home/user:/home/user ccas ~/test.txt
 ```
-где ```~/test.txt``` &mdash; это полный путь до файла из домашней директории.
+где ```~/test.txt``` &mdash; это полный путь до файла из домашней директории, а ```user``` &mdash; имя пользователя в linux.
 
 
 ### Тесты
